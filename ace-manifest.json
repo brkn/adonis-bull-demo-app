@@ -1,0 +1,140 @@
+{
+  "commands": {
+    "dump:rcfile": {
+      "settings": {},
+      "commandPath": "@adonisjs/core/build/commands/DumpRc",
+      "commandName": "dump:rcfile",
+      "description": "Dump contents of .adonisrc.json file along with defaults",
+      "args": [],
+      "aliases": [],
+      "flags": []
+    },
+    "list:routes": {
+      "settings": {
+        "loadApp": true
+      },
+      "commandPath": "@adonisjs/core/build/commands/ListRoutes/index",
+      "commandName": "list:routes",
+      "description": "List application routes",
+      "args": [],
+      "aliases": [],
+      "flags": [
+        {
+          "name": "verbose",
+          "propertyName": "verbose",
+          "type": "boolean",
+          "description": "Display more information"
+        },
+        {
+          "name": "reverse",
+          "propertyName": "reverse",
+          "type": "boolean",
+          "alias": "r",
+          "description": "Reverse routes display"
+        },
+        {
+          "name": "methods",
+          "propertyName": "methodsFilter",
+          "type": "array",
+          "alias": "m",
+          "description": "Filter routes by method"
+        },
+        {
+          "name": "patterns",
+          "propertyName": "patternsFilter",
+          "type": "array",
+          "alias": "p",
+          "description": "Filter routes by the route pattern"
+        },
+        {
+          "name": "names",
+          "propertyName": "namesFilter",
+          "type": "array",
+          "alias": "n",
+          "description": "Filter routes by route name"
+        },
+        {
+          "name": "json",
+          "propertyName": "json",
+          "type": "boolean",
+          "description": "Output as JSON"
+        },
+        {
+          "name": "table",
+          "propertyName": "table",
+          "type": "boolean",
+          "description": "Output as Table"
+        },
+        {
+          "name": "max-width",
+          "propertyName": "maxWidth",
+          "type": "number",
+          "description": "Specify maximum rendering width. Ignored for JSON Output"
+        }
+      ]
+    },
+    "generate:key": {
+      "settings": {},
+      "commandPath": "@adonisjs/core/build/commands/GenerateKey",
+      "commandName": "generate:key",
+      "description": "Generate a new APP_KEY secret",
+      "args": [],
+      "aliases": [],
+      "flags": []
+    },
+    "make:job": {
+      "settings": {},
+      "commandPath": "@rocketseat/adonis-bull/build/commands/MakeJob",
+      "commandName": "make:job",
+      "description": "Make a new Bull job",
+      "args": [
+        {
+          "type": "string",
+          "propertyName": "name",
+          "name": "name",
+          "required": true,
+          "description": "Name of the job class"
+        }
+      ],
+      "aliases": [],
+      "flags": []
+    },
+    "bull:exception": {
+      "settings": {},
+      "commandPath": "@rocketseat/adonis-bull/build/commands/MakeException",
+      "commandName": "bull:exception",
+      "description": "Make a Bull exception handle file",
+      "args": [],
+      "aliases": [],
+      "flags": []
+    },
+    "bull:listen": {
+      "settings": {
+        "loadApp": true,
+        "stayAlive": true
+      },
+      "commandPath": "@rocketseat/adonis-bull/build/commands/Listen",
+      "commandName": "bull:listen",
+      "description": "Start the Bull listener",
+      "args": [],
+      "aliases": [],
+      "flags": [
+        {
+          "name": "board",
+          "propertyName": "board",
+          "type": "boolean",
+          "description": "Run bull's dashboard",
+          "alias": "b"
+        },
+        {
+          "name": "port",
+          "propertyName": "port",
+          "type": "number",
+          "description": "Run bull's dashboard in the provided port",
+          "alias": "p"
+        }
+      ]
+    }
+  },
+  "aliases": {}
+}
