@@ -28,7 +28,8 @@
     "types": [
       "@adonisjs/core",
       "@japa/preset-adonis/build/adonis-typings",
-      "@rocketseat/adonis-bull"
+      "@rocketseat/adonis-bull",
+      "@adonisjs/view"
     ]
   }
 }

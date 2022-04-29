@@ -19,11 +19,16 @@
   "providers": [
     "./providers/AppProvider",
     "@adonisjs/core",
-    "@rocketseat/adonis-bull"
+    "@rocketseat/adonis-bull",
+    "@adonisjs/view"
   ],
   "metaFiles": [
     {
       "pattern": "public/**",
+      "reloadServer": false
+    },
+    {
+      "pattern": "resources/views/**/*.edge",
       "reloadServer": false
     }
   ],

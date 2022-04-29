@@ -32,3 +32,15 @@ node ace bull:listen -b -p 9999
 3. Go to `http://0.0.0.0:3333/?helloTo=felix` in your browser or send a get via Postman etc.
 
 Your portnumber might be different so you might want to fix that in the url.
+
+
+### How to Integrate bull-board
+
+#### Step1: Setup asset manager and adonis view package
+
+```sh
+node ace configure encore
+yarn add @adonisjs/view
+node ace configure @adonisjs/view
+```
+
