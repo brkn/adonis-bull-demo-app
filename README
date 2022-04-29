@@ -32,3 +32,176 @@ node ace bull:listen -b -p 9999
 3. Go to `http://0.0.0.0:3333/?helloTo=felix` in your browser or send a get via Postman etc.
 
 Your portnumber might be different so you might want to fix that in the url.
+
+
+### How to Integrate bull-board
+
+#### Step1: Setup asset manager and adonis view package
+
+```sh
+node ace configure encore
+yarn add @adonisjs/view
+node ace configure @adonisjs/view
+```
+
+#### Step2: Integrate the bull-board ui
+
+install bull-board packages 
+
+```sh
+yarn add -E @bull-board/api @bull-board/ui
+```
+
+Then import them at your `resources/js/app.js` file
+
+```ts
+import '@bull-board/ui/dist/static/favicon-32x32.png'
+import '@bull-board/ui/dist/static/favicon.ico'
+import '@bull-board/ui/dist/static/main.630e9d1237827892f522.css'
+import '@bull-board/ui/dist/static/main.a4963af61e4be9d7fcec'
+import '@bull-board/ui/dist/static/vendor.c8b5cbc4c33a2940401b'
+```
+
+Then create a template file
+
+```sh
+node ace make:view bull-board
+```
+
+There are some changes from the bull-board's `index.ejs` file.
+1. Notice the script element after the root div.
+2. Importing assets has to be adonis way
+3. I haven't made the base path static yet. (This is a todo)
+
+```handlebars
+<!-- resources/views/bull_board.edge -->
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+      <meta name="robots" content="noindex" />
+      <base href="/bull-board" />
+      <title>Bull board</title>
+      <link rel="alternate icon" type="image/png" href="{{ asset('assets/images/favicon-32x32.png') }}">
+      {{--  <link rel="icon" type="image/svg+xml" id="fav-logo" href="{{ asset('assets/images/logo.svg') }}">  --}}
+      <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500&display=swap" rel="stylesheet">
+
+      <link rel="stylesheet" type="text/css" href="{{ asset('assets/app.css') }}">  
+  </head>
+
+  <body>
+    <div id="root">Loading...</div>
+    <script src="{{ asset('assets/app.js') }}"></script>
+  </body>
+</html>
+```
+
+Then let's create the entryPoint routes.
+
+```ts
+// start/routes.ts
+
+import { appRoutes } from '@bull-board/api/dist/src/routes'
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import Route from '@ioc:Adonis/Core/Route'
+
+Route.group(() => {
+  generateBullBoardEntryRoutes()
+}).prefix('/bull-board')
+
+function generateBullBoardEntryRoutes() {
+  const { route: entryRoute, method } = appRoutes.entryPoint
+
+  const routes = Array.isArray(entryRoute) ? entryRoute : [entryRoute]
+
+  const handler = async ({ view }: HttpContextContract) => {
+    return view.render('bull_board')
+  }
+
+  return routes.map((route) => {
+    Route.route(route, [method.toUpperCase()], handler)
+  })
+}
+```
+
+Done! If you visit <http://localhost:3333/bull-board> you should see UI is rendered. Except... The bull-board logo is not rendered, I haven't found a way for this yet. (It should be possible via query selecting the logo and changing it's href)
+
+You won't see any queues yet, because we haven't integrated the api endpoints
+
+
+#### Step 3: Integrate the bull-board api
+
+Note: This step assumes you are using @rocketseat/adonis-bull and bullMq. Change necessary parts if this doesn't fit your case.
+
+If you haven't done in the previous step, install the bull-board api package
+
+```sh
+yarn add -E @bull-board/api
+```
+
+Now we can **adapt** the bull-board/api into our adonis app. Change your routes file like this
+
+```diff
+// start/routes.ts
+
+- import Route from '@ioc:Adonis/Core/Route'
++ import Route, { RouteHandler } from '@ioc:Adonis/Core/Route'
++ import { BullMQAdapter } from '@bull-board/api/dist/src/queueAdapters/bullMQ'
++ import { getQueuesApi } from '@bull-board/api/dist/src/queuesApi'
++ import { AppControllerRoute } from '@bull-board/api/dist/typings/app'
++ import Bull from '@ioc:Rocketseat/Bull'
++ import { Exception } from '@adonisjs/core/build/standalone' 
+
+Route.group(() => {
+  generateBullBoardEntryRoutes()
+  + generateBullBoardApiRoutes()
+}).prefix('/bull-board')
+
++ function generateBullBoardApiRoutes() {
++   const { bullBoardQueues } = getQueuesApi(
++     Object.values(Bull.queues).map((queue) => new BullMQAdapter(queue.bull))
++   )
++ 
++   const generateBullBoardApiRouteHandler = (bullBoardRoute: AppControllerRoute) => {
++     const routeHandler: RouteHandler = async ({ request, response }) => {
++       const params = request.params()
++       const query = request.qs()
++ 
++       try {
++         const { body, status: handlerStatus = 200 } = await bullBoardRoute.handler({
++           queues: bullBoardQueues,
++           query,
++           params,
++         })
++ 
++         return response.status(handlerStatus).send(body)
++       } catch (error) {
++         throw new Exception(error.message)
++       }
++     }
++ 
++     return routeHandler
++   }
++ 
++   const routes = appRoutes.api
++     .map((bullBoardRoute) => {
++       const routes = Array.isArray(bullBoardRoute.route)
++         ? bullBoardRoute.route
++         : [bullBoardRoute.route]
++       const methods = Array.isArray(bullBoardRoute.method)
++         ? bullBoardRoute.method.map((method) => method.toUpperCase())
++         : [bullBoardRoute.method.toUpperCase()]
++ 
++       return routes.map((route) =>
++         Route.route(route, methods, generateBullBoardApiRouteHandler(bullBoardRoute))
++       )
++     })
++     .flat(2)
++ 
++   return routes
++ }
+```
+
+That's it. Other than this being hacky/ugly and some rough edges, it should work.

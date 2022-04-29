@@ -1,0 +1,5 @@
+import '@bull-board/ui/dist/static/favicon-32x32.png'
+import '@bull-board/ui/dist/static/favicon.ico'
+import '@bull-board/ui/dist/static/main.630e9d1237827892f522.css'
+import '@bull-board/ui/dist/static/main.a4963af61e4be9d7fcec'
+import '@bull-board/ui/dist/static/vendor.c8b5cbc4c33a2940401b'
